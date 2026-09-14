@@ -1,0 +1,23 @@
+# Entorno virtual: se reconstruye con requirements.txt
+.venv/
+
+# Caché de Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Variables de entorno y secretos
+.env
+
+# Datos pesados y modelos
+*.ckpt
+*.pth
+
+# Dataset pesado (74 MB, se descarga aparte — ver README)
+F1/data/raw/*.csv
