@@ -18,6 +18,3 @@ desktop.ini
 # Datos pesados y modelos
 *.ckpt
 *.pth
-
-# Dataset pesado (74 MB, se descarga aparte — ver README)
-F1/data/raw/*.csv
