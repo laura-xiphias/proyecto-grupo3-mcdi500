@@ -67,3 +67,25 @@ def verificar_esquema(df: pd.DataFrame, columnas_esperadas: list[str] | None = N
 
     assert not faltantes, f"Faltan {len(faltantes)} columnas declaradas: {sorted(faltantes)}"
     assert not sobrantes, f"Llegaron {len(sobrantes)} columnas no declaradas: {sorted(sobrantes)}"
+
+def resumen_dimensional(df: pd.DataFrame) -> pd.DataFrame:
+    """Devuelve una fila por variable con su tipo, cobertura y cardinalidad.
+
+    Es la fotografía del "antes" del pipeline. El criterio 10 pide un
+    diagnóstico previo, y todo lo que las etapas siguientes afirmen sobre
+    cuántos datos se descartaron o se imputaron se mide contra esta tabla.
+
+    Advertencia sobre no_nulos y pct_nulos: pandas cuenta como presente toda
+    celda que no sea NaN, y en este archivo la ausencia no se codificó como
+    NaN sino como blancos y ceros. Por eso la tabla muestra cobertura completa
+    en las 45 variables. No es un error de la función: es lo que pandas ve.
+    Medir la ausencia real es trabajo de la etapa de exploración.
+    """
+    return pd.DataFrame({
+        "variable": df.columns,
+        "dtype": [str(t) for t in df.dtypes],
+        "no_nulos": df.notna().sum().values,
+        "pct_nulos": (df.isna().mean() * 100).round(2).values,
+        "unicos": [df[c].nunique() for c in df.columns],
+        "memoria_kb": (df.memory_usage(deep=True, index=False) / 1024).round(1).values,
+    })
