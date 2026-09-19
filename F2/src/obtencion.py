@@ -29,3 +29,41 @@ def cargar_crudo(ruta: Path, sep: str = ",", encoding: str = "utf-8-sig") -> pd.
             "La ruta debe ser relativa a la raíz del repositorio."
         )
     return pd.read_csv(ruta, sep=sep, encoding=encoding)
+
+
+def verificar_esquema(df: pd.DataFrame, columnas_esperadas: list[str] | None = None) -> None:
+    """Comprueba que el conjunto trajo exactamente las columnas declaradas.
+
+    Existe por un desfase real de este proyecto: el README del grupo enumeraba
+    42 columnas y el archivo trae 45 — X, Y y FID nunca se documentaron. Un
+    desfase así no rompe nada al cargar; revienta tres etapas después con un
+    KeyError que no dice de dónde viene. Acá falla en el punto de entrada, que
+    es donde todavía se puede arreglar.
+
+    La lista esperada se declara a mano en COLUMNAS_ESPERADAS y no se deriva
+    del archivo: comparar el archivo consigo mismo siempre da verdadero.
+
+    Raises:
+        AssertionError: si falta alguna columna declarada o llega alguna no
+            declarada. El mensaje nombra cuáles, no solo que hubo diferencia.
+    """
+    if columnas_esperadas is None:
+        columnas_esperadas = COLUMNAS_ESPERADAS = [
+    "X", "Y", "FID", "Año", "IdAccident", "Fecha", "Mes", "Dia_mes",
+    "Dia_semana", "Hora", "Hora_texto", "Hora_aprox", "Región", "Comuna",
+    "Tipo_Accid", "Tipo__CONA", "Zona", "Ubicación", "Causa__CON",
+    "Causa_Acci", "Calle_Uno", "Calle_Dos", "Intersecci", "Número", "Ruta",
+    "Ubicaci_1", "Calzada", "Tipo_Calza", "Estado_Cal", "Condición",
+    "Estado_Atm", "Fallecidos", "Graves", "Menos_Grav", "Leves", "CUT_REG",
+    "CUT_PROV", "CUT_COM", "REGION", "PROVINCIA", "COMUNA1", "Tipo_direc",
+    "Direccion", "Lat", "Lon",
+]
+
+    llegaron = set(df.columns)
+    esperadas = set(columnas_esperadas)
+
+    faltantes = esperadas - llegaron
+    sobrantes = llegaron - esperadas
+
+    assert not faltantes, f"Faltan {len(faltantes)} columnas declaradas: {sorted(faltantes)}"
+    assert not sobrantes, f"Llegaron {len(sobrantes)} columnas no declaradas: {sorted(sobrantes)}"
