@@ -8,6 +8,16 @@ from pathlib import Path
 
 import pandas as pd
 
+COLUMNAS_ESPERADAS = [
+    "X", "Y", "FID", "Año", "IdAccident", "Fecha", "Mes", "Dia_mes",
+    "Dia_semana", "Hora", "Hora_texto", "Hora_aprox", "Región", "Comuna",
+    "Tipo_Accid", "Tipo__CONA", "Zona", "Ubicación", "Causa__CON",
+    "Causa_Acci", "Calle_Uno", "Calle_Dos", "Intersecci", "Número", "Ruta",
+    "Ubicaci_1", "Calzada", "Tipo_Calza", "Estado_Cal", "Condición",
+    "Estado_Atm", "Fallecidos", "Graves", "Menos_Grav", "Leves", "CUT_REG",
+    "CUT_PROV", "CUT_COM", "REGION", "PROVINCIA", "COMUNA1", "Tipo_direc",
+    "Direccion", "Lat", "Lon",
+]
 
 def cargar_crudo(ruta: Path, sep: str = ",", encoding: str = "utf-8-sig") -> pd.DataFrame:
     """Carga el CSV crudo sin modificarlo.
@@ -48,16 +58,7 @@ def verificar_esquema(df: pd.DataFrame, columnas_esperadas: list[str] | None = N
             declarada. El mensaje nombra cuáles, no solo que hubo diferencia.
     """
     if columnas_esperadas is None:
-        columnas_esperadas = COLUMNAS_ESPERADAS = [
-    "X", "Y", "FID", "Año", "IdAccident", "Fecha", "Mes", "Dia_mes",
-    "Dia_semana", "Hora", "Hora_texto", "Hora_aprox", "Región", "Comuna",
-    "Tipo_Accid", "Tipo__CONA", "Zona", "Ubicación", "Causa__CON",
-    "Causa_Acci", "Calle_Uno", "Calle_Dos", "Intersecci", "Número", "Ruta",
-    "Ubicaci_1", "Calzada", "Tipo_Calza", "Estado_Cal", "Condición",
-    "Estado_Atm", "Fallecidos", "Graves", "Menos_Grav", "Leves", "CUT_REG",
-    "CUT_PROV", "CUT_COM", "REGION", "PROVINCIA", "COMUNA1", "Tipo_direc",
-    "Direccion", "Lat", "Lon",
-]
+        columnas_esperadas = COLUMNAS_ESPERADAS
 
     llegaron = set(df.columns)
     esperadas = set(columnas_esperadas)
