@@ -1,4 +1,4 @@
-# Proyecto Grupo X — MCDI500
+# Proyecto Grupo 3 — MCDI500
 Se analizan 5.541 casos de atropellos georreferenciados para responder: 
 ¿Qué factores —de la vía, del entorno y del contexto del siniestro— determinan la probabilidad de que un atropello resulte con víctimas fatales?
 
@@ -22,7 +22,7 @@ o error en el dato de dirección, o problemas del proceso de geocodificación ma
 Registros: 5.541 filas correspondientes a siniestros de tránsito tipo atropello
 ocurridos en Chile durante 2023.
 
-Variables: Año, IdAccident,	Fecha,	Mes,	Dia_mes,	Dia_semana,	Hora,	Hora_texto,	Hora_aprox,	Región,	Comuna,	Tipo_Accid,	Tipo__CONA,	Zona,	Ubicación,	Causa__CON,	Causa_Acci,	Calle_Uno,	Calle_Dos,	Intersecci,	Número,	Ruta,	Ubicaci_1,	Calzada,	Tipo_Calza,	Estado_Cal,	Condición,	Estado_Atm,	Fallecidos,	Graves,	Menos_Grav,	Leves,	CUT_REG,	CUT_PROV,	CUT_COM,	REGION,	PROVINCIA,	COMUNA1,	Tipo_direc,	Direccion,	Lat,	Lon.
+Variables: X, Y, FID, Año, IdAccident,	Fecha,	Mes,	Dia_mes,	Dia_semana,	Hora,	Hora_texto,	Hora_aprox,	Región,	Comuna,	Tipo_Accid,	Tipo__CONA,	Zona,	Ubicación,	Causa__CON,	Causa_Acci,	Calle_Uno,	Calle_Dos,	Intersecci,	Número,	Ruta,	Ubicaci_1,	Calzada,	Tipo_Calza,	Estado_Cal,	Condición,	Estado_Atm,	Fallecidos,	Graves,	Menos_Grav,	Leves,	CUT_REG,	CUT_PROV,	CUT_COM,	REGION,	PROVINCIA,	COMUNA1,	Tipo_direc,	Direccion,	Lat,	Lon.
 
 El conjunto (2,7 MB) se versiona directamente en `F1/data/raw/`, sin modificar.
 
