@@ -6,10 +6,11 @@ def limpiar_datos(df_raw):
     if 'Lat' in df.columns and 'Lon' in df.columns:
         df = df.dropna(subset=['Lat', 'Lon'])
 
-    columnas_texto = ['Tipo_direc', 'Direccion', 'COMUNA1', 'REGION']
+    columnas_texto = ['Ruta', 'Calle_Uno', 'Calle_Dos', 'Intersecci', 'Condición', 'Ubicación']
     for col in columnas_texto:
         if col in df.columns:
-            df[col] = df[col].fillna('Desconocido').astype(str).str.strip().str.title()
+            df[col] = df[col].fillna('Desconocido').astype(str).str.strip()
+            df[col] = df[col].replace('', 'Desconocido')
 
     if 'Fecha' in df.columns:
         df['Fecha'] = pd.to_datetime(df['Fecha']).dt.date
