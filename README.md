@@ -44,7 +44,19 @@ Python 3.13.15
 Ejecutar los notebooks en orden desde la raíz del proyecto.
 
 ## Convención de commits
-Prefijos usados: docs, data, feat, fix. Ver Parte XVIII de la guía.
+Prefijos usados: docs, data, feat, fix.
 
 ## Decisiones técnicas
-Registro breve de las decisiones relevantes y su motivo.
+
+**Reutilización de F1/data/processed/ para el output de F2.** 
+En vez de crear una carpeta data/processed propia dentro de F2, se decidió aprovechar la ya existente en F1 (aún vacía), evitando duplicar la estructura de carpetas de datos procesados entre fases consecutivas del mismo pipeline.
+
+**Train/test split proyectado para Fase 3.** 
+F2 se detiene deliberadamente en la generación de features (df_features), sin particionar aún el conjunto en entrenamiento y prueba. La función `preprocesar_modelo()` que realiza ese split ya está escrita y probada en `transformacion.py`, pero su ejecución queda reservada para cuando corresponda modelar, conforme al alcance de cada fase.
+
+**Normalización de nombres de módulos a minúsculas.** 
+Los archivos `Exploracion.py` y `Transformacion.py` se renombraron a minúsculas
+(`exploracion.py`, `transformacion.py`) para evitar errores de importación en sistemas operativos que sí distinguen mayúsculas de minúsculas (macOS, Linux), dado que Windows los trataba como equivalentes sin advertir el problema.
+
+**Trabajo en ramas por integrante.** 
+Cada miembro del equipo desarrolló su aporte en una rama propia (por ejemplo, f2-limpieza), integrándola a main mediante pull request una vez revisada, conforme al criterio de ramas declarado en la Fase 1 (main protegida, una rama por integrante).
