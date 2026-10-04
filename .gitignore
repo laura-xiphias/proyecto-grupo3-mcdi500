@@ -18,3 +18,6 @@ desktop.ini
 # Datos pesados y modelos
 *.ckpt
 *.pth
+
+# Datos: ver README (como obtener el CSV)
+*.csv

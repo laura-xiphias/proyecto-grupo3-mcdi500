@@ -24,7 +24,16 @@ ocurridos en Chile durante 2023.
 
 Variables: X, Y, FID, Año, IdAccident,	Fecha,	Mes,	Dia_mes,	Dia_semana,	Hora,	Hora_texto,	Hora_aprox,	Región,	Comuna,	Tipo_Accid,	Tipo__CONA,	Zona,	Ubicación,	Causa__CON,	Causa_Acci,	Calle_Uno,	Calle_Dos,	Intersecci,	Número,	Ruta,	Ubicaci_1,	Calzada,	Tipo_Calza,	Estado_Cal,	Condición,	Estado_Atm,	Fallecidos,	Graves,	Menos_Grav,	Leves,	CUT_REG,	CUT_PROV,	CUT_COM,	REGION,	PROVINCIA,	COMUNA1,	Tipo_direc,	Direccion,	Lat,	Lon.
 
-El conjunto (2,7 MB) se versiona directamente en `F1/data/raw/`, sin modificar.
+El conjunto (2,7 MB) **no se versiona**: `*.csv` está en `.gitignore`. Para reproducir el proyecto:
+
+1. Descargar «Siniestros de tipo atropello 2023» desde el enlace de CONASET indicado arriba, en formato CSV.
+2. Guardarlo como `F1/data/raw/Atropellos_2023.csv`.
+3. Verificar que es el mismo archivo con su huella SHA-256:
+
+    sha256sum F1/data/raw/Atropellos_2023.csv
+    # 96c94c37a1472d595a6da1b53310a53eeb12c8b4f9419dab586fed832cdca553
+
+El notebook `F4/F4_Integrador.ipynb` comprueba esta huella al iniciar. El archivo procesado (`F1/data/processed/`) tampoco se versiona: se genera al ejecutar el notebook de F2.
 
 ## Estructura del repositorio
 F1/ Definición del problema y entorno reproducible
