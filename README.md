@@ -7,7 +7,7 @@ Se analizan 5.541 casos de atropellos georreferenciados para responder:
 Laura Arenas (@laura-xiphias)
 Daniel Herrera (@dnietoh-ctrl)
 Karim Zaid (@karimzaid)
-Jeremmy Díaz (@kirijota98)
+Jeremmy Diaz (@kirijota98)
 
 ## Datos
 Fuente: Comisión Nacional de Seguridad de Tránsito (CONASET), con datos originales
@@ -24,16 +24,26 @@ ocurridos en Chile durante 2023.
 
 Variables: X, Y, FID, Año, IdAccident,	Fecha,	Mes,	Dia_mes,	Dia_semana,	Hora,	Hora_texto,	Hora_aprox,	Región,	Comuna,	Tipo_Accid,	Tipo__CONA,	Zona,	Ubicación,	Causa__CON,	Causa_Acci,	Calle_Uno,	Calle_Dos,	Intersecci,	Número,	Ruta,	Ubicaci_1,	Calzada,	Tipo_Calza,	Estado_Cal,	Condición,	Estado_Atm,	Fallecidos,	Graves,	Menos_Grav,	Leves,	CUT_REG,	CUT_PROV,	CUT_COM,	REGION,	PROVINCIA,	COMUNA1,	Tipo_direc,	Direccion,	Lat,	Lon.
 
-El conjunto (2,7 MB) se versiona directamente en `F1/data/raw/`, sin modificar.
+El conjunto (2,7 MB) **no se versiona**: `*.csv` está en `.gitignore`. Para reproducir el proyecto:
+
+1. Descargar «Siniestros de tipo atropello 2023» desde el enlace de CONASET indicado arriba, en formato CSV.
+2. Guardarlo como `F1/data/raw/Atropellos_2023.csv`.
+3. Verificar que es el mismo archivo con su huella SHA-256:
+
+    sha256sum F1/data/raw/Atropellos_2023.csv
+    # 96c94c37a1472d595a6da1b53310a53eeb12c8b4f9419dab586fed832cdca553
+
+El notebook `F4/F4_Integrador.ipynb` comprueba esta huella al iniciar. El archivo procesado (`F1/data/processed/`) tampoco se versiona: se genera al ejecutar el notebook de F2.
 
 ## Estructura del repositorio
 F1/ Definición del problema y entorno reproducible
 F2/ Obtención, limpieza y transformación de datos
 F3/ Núcleo algorítmico: programación estructurada, recursiva y POO
 F4/ Análisis, visualización y comunicación de resultados
+docs/ Evidencia de ejecución (HTML) e informes de las sumativas anteriores
 
 ## Requisitos y ejecución
-Python 3.13.7
+Python 3.13
 
     python -m venv .venv
     .venv\Scripts\Activate.ps1          # Windows, PowerShell
@@ -41,7 +51,7 @@ Python 3.13.7
     # source .venv/bin/activate          # macOS y Linux
     python -m pip install -r requirements.txt
 
-Ejecutar los notebooks en orden (F1, F2, F3) desde la carpeta de cada fase.
+Antes de ejecutar, obtener el dato original (ver Datos). Ejecutar los notebooks en orden (F1, F2, F3, F4) desde la carpeta de cada fase.
 
 ## Convención de commits
 Prefijos usados: docs, data, feat, fix.
@@ -87,3 +97,28 @@ Dejamos las funciones en archivos separados para que el notebook quede más cort
 - Usar recursión solo cuando no se sabe cuántos niveles tiene el problema (las carpetas del proyecto), y no en la tabla de atropellos.
 
 **Error encontrado:** al revisar el código de la Fase 2 vimos que `Hora_limpia` quedó en 0 en todas las filas, porque se calculó desde la columna `Hora`, que viene con el mismo valor en todo el archivo. En F3 la hora se saca de `Hora_texto`. El notebook de la Fase 2 no se modificó porque ya fue entregado.
+
+## Fase 4 — Integración, visualización y comunicación
+
+Integra las fases anteriores en un solo flujo reproducible: carga y verifica el dato, aplica la limpieza de F2, corrige `Hora_limpia`, mide la eficiencia con clases y construye tres visualizaciones analíticas.
+
+| Archivo | Qué hace |
+|---|---|
+| `F4/F4_Integrador.ipynb` | Notebook integrador: ejecuta el flujo completo y genera figuras y resultados |
+| `F4/src/pipeline.py` | Verifica la huella SHA-256, aplica la limpieza, corrige la hora y construye las matrices de visualización y de análisis |
+| `F4/src/mediciones.py` | Clase base `Medicion` y tres hijas (`MedicionHora`, `MedicionBusqueda`, `MedicionRecorrido`), con patrón Strategy |
+| `F4/src/visualizacion.py` | Las tres visualizaciones analíticas |
+| `F4/tests/test_pipeline.py` | 24 pruebas de caso normal, límite y excepción |
+| `F4/figuras/`, `F4/resultados/` | Figuras generadas, `mediciones.csv` y `entorno.txt` (versiones del entorno) |
+
+**Cómo ejecutarlo.** Con el `.venv` activo y el CSV original en `F1/data/raw/`, ejecutar F1, F2, F3 y F4 en ese orden. Para regenerar la evidencia en HTML (ejemplo con F4):
+
+    python -m jupyter nbconvert --to html --execute F4/F4_Integrador.ipynb --output-dir docs/evidencia
+
+**Pruebas.** Desde la carpeta `F4/`:
+
+    python -m unittest discover -s tests -v
+
+**Trazabilidad.** La evidencia de ejecución de los cuatro notebooks está en `docs/evidencia/`, los informes de las sumativas 1 y 2 en `docs/informes/`, el registro de cambios con sus commits en `changelog.md` y la unificación de identidades de autoría en `.mailmap`.
+
+**Corrección de `Hora_limpia`.** La función `pipeline.corregir_hora` calcula la hora desde `Hora_texto`, con una prueba de regresión que impide que la variable vuelva a quedar en 0.
