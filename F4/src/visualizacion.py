@@ -30,6 +30,11 @@ def _n(valor, decimales=0):
     return f"{valor:.{decimales}f}".replace(".", ",")
 
 
+def _miles(valor):
+    """Entero con punto como separador de miles (5541 -> 5.541)."""
+    return format(int(valor), ",").replace(",", ".")
+
+
 def _titulo(fig, texto):
     fig.suptitle("\n".join(textwrap.wrap(texto, 78)), fontsize=11.5,
                  fontweight="bold", x=0.01, ha="left")
@@ -95,32 +100,43 @@ def figura_causa(visual, minimo_n=30):
                  f"con mayor letalidad; en rojo, las que superan el promedio general")
     fig.text(0.01, 0.005, FUENTE + f" Causa asignada por Carabineros. Se excluyen {excluidas} "
              f"causas con n < {minimo_n}.", fontsize=8)
-    fig.tight_layout(rect=(0, 0.03, 1, 0.88))
+    fig.tight_layout(rect=(0, 0.03, 1, 0.93))
     return fig
 
 
-def figura_zona_tramo(visual):
-    """Resolución: ¿el riesgo nocturno se mantiene al separar por zona?"""
-    celdas = (visual.groupby(["Zona", "Tramo_horario"], observed=True)["Es_Fatal"]
-              .agg(n="size", tasa="mean").reset_index())
-    celdas["tasa"] *= 100
-    tasa = celdas.pivot(index="Zona", columns="Tramo_horario", values="tasa")
-    n = celdas.pivot(index="Zona", columns="Tramo_horario", values="n")
-    etiquetas = tasa.round(0).astype(int).astype(str) + " %\n(n=" + n.astype(int).astype(str) + ")"
+def figura_zona_jornada(visual):
+    """Resolución: ¿el riesgo nocturno se mantiene al separar por zona?
 
-    noche = visual["Hora_limpia"].isin([22, 23, 0, 1, 2, 3, 4, 5])
-    por = visual.assign(noche=noche).groupby(["Zona", "noche"])["Es_Fatal"].mean() * 100
+    Barras agrupadas con intervalo de confianza de Wilson (95 %). El diseño
+    sigue la propuesta de Karim Zaid para la figura de zona y jornada.
+    """
+    tabla = pipeline.tasa_zona_jornada(visual)
+    colores = {"Urbana": "#2B7BD6", "Rural": "#EC6A34"}
+    ancho = 0.38
+    fig, eje = plt.subplots(figsize=(9, 5.2))
+    for k, zona in enumerate(["Urbana", "Rural"]):
+        fila = tabla[tabla["Zona"] == zona].set_index("Jornada").loc[pipeline.ORDEN_JORNADAS]
+        x = np.arange(len(fila)) + (k - 0.5) * (ancho + 0.02)
+        eje.bar(x, fila["tasa"], width=ancho, color=colores[zona], label=zona)
+        eje.errorbar(x, fila["tasa"], yerr=[fila["tasa"] - fila["inf"], fila["sup"] - fila["tasa"]],
+                     fmt="none", ecolor="#444444", capsize=3, linewidth=1.2)
+        for xi, (_, r) in zip(x, fila.iterrows()):
+            eje.text(xi, r["sup"] + 1.2, f"{_n(r['tasa'], 1)} %", ha="center", fontweight="bold", fontsize=10)
+            eje.text(xi, r["sup"] + 4.6, f"n = {_miles(r['n'])}", ha="center", fontsize=8, color="#555555")
+    eje.set_xticks(np.arange(len(pipeline.ORDEN_JORNADAS)))
+    eje.set_xticklabels(pipeline.ORDEN_JORNADAS)
+    eje.set_ylabel("Atropellos fatales (%)")
+    eje.set_ylim(0, tabla["sup"].max() + 12)
+    eje.legend(title="Zona", loc="upper left", frameon=False)
+    eje.grid(axis="x", visible=False)
+    sns.despine(ax=eje)
 
-    fig, eje = plt.subplots(figsize=(9, 3.8))
-    sns.heatmap(tasa, annot=etiquetas, fmt="", cmap="Reds", vmin=0, linewidths=0.6,
-                cbar_kws={"label": "% con fallecido"}, ax=eje)
-    eje.set_xlabel("Tramo horario")
-    eje.set_ylabel("Zona")
-    eje.tick_params(axis="y", rotation=0)
-
-    _titulo(fig, f"El riesgo nocturno (22-05 h) se mantiene al separar por zona: "
-                 f"rural {por['Rural', True]:.0f} % de noche frente a {por['Rural', False]:.0f} % de día; "
-                 f"urbana {por['Urbana', True]:.0f} % frente a {por['Urbana', False]:.0f} %")
-    fig.text(0.01, 0.005, FUENTE + " Porcentaje calculado por celda (zona × tramo).", fontsize=8)
-    fig.tight_layout(rect=(0, 0.03, 1, 0.86))
+    t = tabla.set_index(["Zona", "Jornada"])["tasa"]
+    rural_noche, urbana_dia = t["Rural", pipeline.ORDEN_JORNADAS[1]], t["Urbana", pipeline.ORDEN_JORNADAS[0]]
+    _titulo(fig, f"De noche en zona rural, {_n(rural_noche, 0)} % de los atropellos son fatales; "
+                 f"de día en zona urbana, {_n(urbana_dia, 1)} % (una tasa {_n(rural_noche / urbana_dia, 0)} veces menor)")
+    n_total = int(tabla["n"].sum())
+    fig.text(0.01, 0.005, "Fuente: elaboración propia con datos de CONASET y Carabineros de Chile, Siniestros de tipo atropello 2023 "
+             f"(n = {_miles(n_total)}). Barras de error: IC 95 % (Wilson).", fontsize=8)
+    fig.tight_layout(rect=(0, 0.03, 1, 0.93))
     return fig

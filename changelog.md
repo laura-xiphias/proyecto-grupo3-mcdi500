@@ -9,7 +9,7 @@ Registro de cambios por fase. Cada entrada indica fecha, descripción, commit y 
   Responde a la observación de la Sumativa 2 (implementar clases): formaliza `comparar()` como patrón Strategy.
 - Mediciones con `timeit` y `tracemalloc` sobre tamaños crecientes, con exponente empírico (commit 72d9e8b).
   Una medición en un solo tamaño no permitía inferir la complejidad.
-- Pruebas de caso normal, límite y excepción en `F4/tests/test_pipeline.py`, 24 pruebas reejecutables (commit 72d9e8b).
+- Pruebas de caso normal, límite y excepción en `F4/tests/test_pipeline.py`, 28 pruebas reejecutables (commit 72d9e8b).
   Responde a la observación de la Sumativa 1 sobre casos límite y excepciones.
 - Tres visualizaciones analíticas en `F4/src/visualizacion.py` y `F4/figuras/` (commit 72d9e8b). Comunican los hallazgos del objetivo 5.
 - Notebook integrador `F4/F4_Integrador.ipynb` (commit 72d9e8b).
@@ -18,6 +18,7 @@ Registro de cambios por fase. Cada entrada indica fecha, descripción, commit y 
 - Archivo `.mailmap` en la rama principal (commit 2381051). Unifica las identidades duplicadas de Git (sumativas 1 y 2).
 
 ### Cambiado
+- Figura 3 (zona y jornada) rediseñada como barras agrupadas con intervalo de confianza de Wilson (95 %), con día 7:00–19:59 y noche 20:00–6:59; se agregan `intervalo_wilson` y `tasa_zona_jornada` con 4 pruebas nuevas (commit ad521e7). Diseño propuesto por Karim Zaid, reimplementado en el pipeline para que la figura se genere desde el notebook.
 - Los CSV dejan de versionarse: `*.csv` en `.gitignore`; el README documenta cómo obtener el dato y su SHA-256 (commit aee6a3d). Sumativa 1.
 - Notebook de F1 movido a la raíz de la carpeta F1 y módulos de F2 renombrados a minúscula, para unificar estructura y nomenclatura entre fases (commit 511fa0e). Sumativa 1.
 - `F2/src/exploracion.py` y `F2/src/transformacion.py` renombrados con `git mv`: Git en Windows no registraba el cambio de mayúsculas y el import fallaba en Linux y macOS (commit 511fa0e).

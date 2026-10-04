@@ -21,6 +21,9 @@ import transformacion  # F2/src
 HUELLA_SHA256 = "96c94c37a1472d595a6da1b53310a53eeb12c8b4f9419dab586fed832cdca553"
 COLUMNAS_TEXTO = ["Ruta", "Calle_Uno", "Calle_Dos", "Intersecci", "Condición", "Ubicación"]
 ORDEN_TRAMOS = ["00-05 h", "06-11 h", "12-17 h", "18-21 h", "22-23 h"]
+HORA_INICIO_NOCHE = 20   # la noche va de 20:00 a 06:59; el día, de 07:00 a 19:59
+HORA_FIN_NOCHE = 6
+ORDEN_JORNADAS = ["Día (7:00–19:59)", "Noche (20:00–6:59)"]
 
 
 def huella_sha256(ruta):
@@ -81,6 +84,39 @@ def tasa_fatalidad(visual, por, minimo_n=30):
              .agg(n="size", fatales="sum", tasa="mean").reset_index())
     tabla["tasa"] = tabla["tasa"] * 100
     return tabla[tabla["n"] >= minimo_n].sort_values("tasa", ascending=False)
+
+
+def intervalo_wilson(fatales, n, z=1.96):
+    """Intervalo de confianza de Wilson (95 % por defecto) para una proporción.
+
+    Devuelve (inferior, superior) como proporciones entre 0 y 1. Se prefiere al
+    intervalo normal porque no sale de [0, 1] con n pequeño ni con proporciones
+    cercanas a 0.
+    """
+    if n <= 0:
+        raise ValueError("n debe ser positivo para calcular el intervalo")
+    if not 0 <= fatales <= n:
+        raise ValueError("fatales debe estar entre 0 y n")
+    p = fatales / n
+    denominador = 1 + z ** 2 / n
+    centro = (p + z ** 2 / (2 * n)) / denominador
+    margen = z * np.sqrt(p * (1 - p) / n + z ** 2 / (4 * n ** 2)) / denominador
+    return max(0.0, centro - margen), min(1.0, centro + margen)
+
+
+def tasa_zona_jornada(visual):
+    """Tasa de fatalidad (%) por zona y jornada (día/noche), con IC 95 % de Wilson."""
+    validar_columnas(visual, ["Zona", "Hora_limpia", "Es_Fatal"])
+    hora_ = visual["Hora_limpia"]
+    es_noche = (hora_ >= HORA_INICIO_NOCHE) | (hora_ <= HORA_FIN_NOCHE)
+    jornada = np.where(es_noche, ORDEN_JORNADAS[1], ORDEN_JORNADAS[0])
+    tabla = (visual.assign(Jornada=jornada).groupby(["Zona", "Jornada"])["Es_Fatal"]
+             .agg(n="size", fatales="sum").reset_index())
+    limites = [intervalo_wilson(int(f), int(n)) for f, n in zip(tabla["fatales"], tabla["n"])]
+    tabla["tasa"] = tabla["fatales"] / tabla["n"] * 100
+    tabla["inf"] = [100 * i for i, _ in limites]
+    tabla["sup"] = [100 * s for _, s in limites]
+    return tabla
 
 
 def construir_matriz_analisis(df, test_size=0.2, random_state=42):

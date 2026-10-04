@@ -175,5 +175,41 @@ class Mediciones(unittest.TestCase):
         self.assertEqual(m.resultados.loc[0, "n"], 20)
 
 
+class IntervaloYJornada(unittest.TestCase):
+    """Intervalo de Wilson y tasa por zona y jornada (figura 3)."""
+
+    def test_wilson_valor_conocido(self):
+        # 50 de 100 con z = 1,96: [0,404; 0,596] (valor de referencia de la fórmula de Wilson)
+        inf, sup = pipeline.intervalo_wilson(50, 100)
+        self.assertAlmostEqual(inf, 0.4038, places=3)
+        self.assertAlmostEqual(sup, 0.5962, places=3)
+
+    def test_wilson_no_sale_de_cero_y_uno(self):
+        inf, sup = pipeline.intervalo_wilson(0, 5)
+        self.assertEqual(inf, 0.0)
+        self.assertLess(sup, 1.0)
+        inf, sup = pipeline.intervalo_wilson(5, 5)
+        self.assertGreater(inf, 0.0)
+        self.assertAlmostEqual(sup, 1.0)
+
+    def test_wilson_rechaza_n_invalido(self):
+        with self.assertRaises(ValueError):
+            pipeline.intervalo_wilson(0, 0)
+        with self.assertRaises(ValueError):
+            pipeline.intervalo_wilson(6, 5)
+
+    def test_tasa_zona_jornada_separa_dia_y_noche(self):
+        visual = pd.DataFrame({
+            "Zona": ["Rural"] * 4 + ["Urbana"] * 2,
+            "Hora_limpia": [19, 20, 6, 7, 12, 23],
+            "Es_Fatal": [0, 1, 1, 0, 0, 1],
+        })
+        t = pipeline.tasa_zona_jornada(visual).set_index(["Zona", "Jornada"])
+        self.assertEqual(t.loc[("Rural", pipeline.ORDEN_JORNADAS[1]), "n"], 2)
+        self.assertEqual(t.loc[("Rural", pipeline.ORDEN_JORNADAS[0]), "n"], 2)
+        self.assertAlmostEqual(t.loc[("Rural", pipeline.ORDEN_JORNADAS[1]), "tasa"], 100.0)
+        self.assertAlmostEqual(t.loc[("Urbana", pipeline.ORDEN_JORNADAS[1]), "tasa"], 100.0)
+
+
 if __name__ == "__main__":
     unittest.main()
