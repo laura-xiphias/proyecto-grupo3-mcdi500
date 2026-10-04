@@ -21,3 +21,4 @@ desktop.ini
 
 # Datos: ver README (como obtener el CSV)
 *.csv
+!F4/resultados/*.csv
